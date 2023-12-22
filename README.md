@@ -1,5 +1,5 @@
 # Sachin Sasidharan Nair
-*Edinburgh, Scotland | +44 7752-420534 
+Edinburgh, Scotland | +44 7752-420534 
 
 ## Education
 - **Heriot-Watt University, Edinburgh, Scotland, UK**
