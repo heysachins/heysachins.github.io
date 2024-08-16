@@ -624,15 +624,18 @@ main {
 .testimonials-item {
   min-width: 100%;
   scroll-snap-align: center;
+  
 }
-
+.testimonials-avatar-box img {
+  border-radius: 14px;
+}
 .testimonials-avatar-box {
   position: absolute;
   top: 0;
   left: 0;
   transform: translate(15px, -25px);
   background: var(--bg-gradient-onyx);
-  border-radius: 14px;
+  border-radius: 100px !important;
   box-shadow: var(--shadow-1);
 }
 
