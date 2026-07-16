@@ -1931,3 +1931,23 @@ textarea.form-input::-webkit-resizer { display: none; }
 
   .timeline-text { max-width: 700px; }
 
+}
+
+
+/* Hide certificate images on the small cards (fixes Microsoft bulging) */
+.testimonials-item .testimonials-text img,
+.testimonials-item .testimonials-text iframe {
+  display: none;
+}
+
+/* Show and expand certificate images ONLY inside the popup modal */
+.modal-content .testimonials-text img,
+.modal-content .testimonials-text iframe {
+  display: block;
+  width: 100% !important;
+  height: auto !important;
+  margin-top: 15px;
+}
+.modal-content .testimonials-text iframe {
+  height: 400px !important;
+}
