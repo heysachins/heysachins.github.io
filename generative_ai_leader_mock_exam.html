@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generative AI Leader - Master Mock Exam</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --accent: #3b82f6;
+            --correct: #22c55e;
+            --wrong: #ef4444;
+            --border: #334155;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+        .layout {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 280px;
+            gap: 2rem;
+            align-items: start;
+        }
+        @media (max-width: 768px) {
+            .layout { grid-template-columns: 1fr; }
+        }
+        .main-content { min-width: 0; }
+        header {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+        h1 { font-size: 1.5rem; font-weight: 700; }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+        .q-meta {
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .question-text {
+            font-size: 1.15rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            white-space: pre-line;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .option-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: left;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            line-height: 1.4;
+        }
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--accent);
+            background: rgba(59, 130, 246, 0.1);
+        }
+        .option-btn:disabled { cursor: default; }
+        .option-btn.correct {
+            border-color: var(--correct);
+            background: rgba(34, 197, 94, 0.15);
+            color: #dcfce7;
+        }
+        .option-btn.wrong {
+            border-color: var(--wrong);
+            background: rgba(239, 68, 68, 0.15);
+            color: #fee2e2;
+        }
+        .explanation {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border-left: 4px solid var(--accent);
+            border-radius: 4px;
+            font-size: 0.95rem;
+            color: #cbd5e1;
+            display: none;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.65rem 1.25rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+        .btn-secondary:hover:not(:disabled) { background: rgba(255,255,255,0.05); }
+
+        .sidebar {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: sticky;
+            top: 2rem;
+        }
+        .sidebar h3 { font-size: 1.1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+        .score-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+        }
+        .score-val { font-weight: 700; color: var(--accent); }
+        .jump-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+            margin-top: 1rem;
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        .jump-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 6px 0;
+            text-align: center;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .jump-btn:hover { border-color: var(--accent); }
+        .jump-btn.answered { background: rgba(59, 130, 246, 0.2); border-color: var(--accent); }
+        .jump-btn.current { border: 2px solid var(--text); font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="layout">
+    <div class="main-content">
+        <header>
+            <h1>Generative AI Leader Master Exam</h1>
+        </header>
+
+        <div class="card" id="quiz-container">
+            <div class="q-meta" id="q-number">Question 1 of 50</div>
+            <div class="question-text" id="q-text">Loading exam questions...</div>
+            <div class="options" id="options-container"></div>
+            <div class="explanation" id="explanation-box"></div>
+
+            <div class="controls">
+                <button class="btn btn-secondary" id="prev-btn" onclick="prevQuestion()">Previous</button>
+                <button class="btn btn-secondary" onclick="resetAndShuffle()">Shuffle New 50</button>
+                <button class="btn" id="next-btn" onclick="nextQuestion()">Next Question</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <h3>Scorecard</h3>
+        <div class="score-row">
+            <span>Correct:</span>
+            <span class="score-val" id="score-correct">0</span>
+        </div>
+        <div class="score-row">
+            <span>Answered:</span>
+            <span class="score-val" id="score-answered">0 / 50</span>
+        </div>
+        <div class="score-row">
+            <span>Accuracy:</span>
+            <span class="score-val" id="score-accuracy">0%</span>
+        </div>
+        
+        <h3 style="margin-top: 1.5rem;">Question Navigator</h3>
+        <div class="jump-grid" id="jump-grid"></div>
+    </div>
+</div>
+
+<script>
+const masterPool = [
+    {
+        id: 1,
+        question: "What is the definition of generative AI?",
+        options: {
+            A: "A. A type of predictive model that estimates a relationship by fitting a line to the observed data.",
+            B: "B. A type of artificial intelligence that can create new content and ideas, including text, images, music, and code.",
+            C: "C. A type of machine learning algorithm inspired by the human brain that is made up of interconnected nodes.",
+            D: "D. A type of artificial intelligence that enables a system to autonomously learn and improve using neural networks and deep learning."
+        },
+        answer: "B",
+        explanation: "Generative AI refers to AI systems that can generate original content, produce text, images, audio, video, and code, and create outputs based on patterns learned from data."
+    },
+    {
+        id: 2,
+        question: "A company wants to use an AI agent to automate some tasks. They want everyone to understand the different functions of an AI agent. What is the function of an AI agent in the context of gen AI?",
+        options: {
+            A: "A. To provide the computational resources needed to train and run gen AI models.",
+            B: "B. To store and manage large datasets used for training and running gen AI models.",
+            C: "C. To provide a user-friendly interface for interacting with gen AI models.",
+            D: "D. To analyze situations, use multiple tools, and make informed decisions without requiring constant human input."
+        },
+        answer: "D",
+        explanation: "D is correct because it encapsulates the core functionality of an AI agent in generative AI, which is to autonomously analyze contexts and leverage tools for decision-making without needing continuous human intervention."
+    },
+    {
+        id: 3,
+        question: "What is the definition of an AI agent?",
+        options: {
+            A: "A. An application that learns how to achieve a goal based on inputs and tools available to it.",
+            B: "B. A human expert who oversees and manages the operation of a gen AI application.",
+            C: "C. A type of user interface that allows users to interact with a gen AI application.",
+            D: "D. A static component of a gen AI application that provides information to the user."
+        },
+        answer: "A",
+        explanation: "The correct answer is A, as it encapsulates the essence of an AI agent as an application designed to learn and achieve specific goals through available resources."
+    },
+    {
+        id: 4,
+        question: "A company is developing an AI character for a video game. The AI character needs to learn how to navigate a complex environment and make decisions to achieve certain objectives within the game. When the AI takes actions that lead to positive outcomes like finding a reward or overcoming an obstacle, it receives a positive score. When it takes actions that lead to negative outcomes, like hitting a wall or losing progress, it receives a negative score. Through this process of trial and error, the AI gradually improves the character's ability to play the game effectively. What machine learning should the company use?",
+        options: {
+            A: "A. Unsupervised learning",
+            B: "B. Reinforcement learning",
+            C: "C. Supervised learning",
+            D: "D. Deep learning"
+        },
+        answer: "B",
+        explanation: "B is correct because reinforcement learning (RL) is specifically designed for environments where agents learn from the consequences of their actions to maximize cumulative rewards."
+    },
+    {
+        id: 5,
+        question: "A research team has collected a large dataset of sensor readings from various industrial machines. This dataset includes measurements like temperature, pressure vibration levels and electrical current recorded at regular intervals. The team has not yet assigned any labels or categories to these readings and wants to identify potential anomalies, malfunctions or natural groupings of machine behavior based on the sensor data alone. What type of machine learning should they use?",
+        options: {
+            A: "A. Deep learning",
+            B: "B. Reinforcement learning",
+            C: "C. Supervised learning",
+            D: "D. Unsupervised learning"
+        },
+        answer: "D",
+        explanation: "D is correct because unsupervised learning effectively identifies patterns or anomalies in unlabeled datasets."
+    },
+    {
+        id: 6,
+        question: "A highly regulated financial institution wants to use Gemini as the core decision engine for a loan approval system that will deterministically approve or reject loan applications based on a strict set of predefined criteria. Why is this an inappropriate use case for Gemini?",
+        options: {
+            A: "A. Gemini deployment for this scenario would be too expensive and complex.",
+            B: "B. Gemini's designed for flexible content generation and inference, not rigid rule-based decisions.",
+            C: "C. Gemini is not equipped to handle structured numerical data for financial assessments.",
+            D: "D. Gemini cannot integrate with required financial databases."
+        },
+        answer: "B",
+        explanation: "Google Gemini (like other large language models) is built for probabilistic reasoning, flexible inference, and generative tasks, not rigid rule-based decisions."
+    },
+    {
+        id: 7,
+        question: "What is an example of unsupervised machine learning?",
+        options: {
+            A: "A. Predicting subscription renewal based on past renewal status data.",
+            B: "B. Training a system to recognize product images using labeled categories.",
+            C: "C. Analyzing customer purchase patterns to identify natural groupings.",
+            D: "D. Forecasting sales figures using historical sales and marketing spend."
+        },
+        answer: "C",
+        explanation: "Unsupervised machine learning is used when the data does not have predefined labels or outcomes. The system tries to find hidden patterns or structures within the data."
+    },
+    {
+        id: 8,
+        question: "A user asks a generative AI model about the scientific accuracy of a popular science fiction movie. The model confidently states that humans can indeed travel faster than light, referencing specific but entirely fictional theories and providing made-up explanations of how this is achieved according to the movie's established science. The model presents this information as factual, without indicating that it originates from a fictional work. What type of model limitation is this?",
+        options: {
+            A: "A. Bias",
+            B: "B. Hallucination",
+            C: "C. Knowledge cutoff",
+            D: "D. Data dependency"
+        },
+        answer: "B",
+        explanation: "Hallucination refers to the model generating outputs that are nonsensical, factually incorrect, or inconsistent with the input data, despite appearing coherent and plausible."
+    },
+    {
+        id: 9,
+        question: "What does a diffusion model do?",
+        options: {
+            A: "A. Generates high-quality content by refining noise into structured data.",
+            B: "B. Facilitates the storage and management of structured data.",
+            C: "C. Analyzes data and predicts future trends and patterns.",
+            D: "D. Optimizes business processes and resource allocation."
+        },
+        answer: "A",
+        explanation: "Diffusion models generate high-quality content by starting with random noise and gradually refining it into structured data."
+    },
+    {
+        id: 10,
+        question: "An organization is collecting data to train a generative AI model for customer service. They want to ensure security throughout the ML lifecycle. What is a critical consideration at this stage?",
+        options: {
+            A: "A. Applying the latest software patches to the AI model on a regular basis.",
+            B: "B. Monitoring the AI model's performance for unexpected outputs and potential errors.",
+            C: "C. Establishing ethical guidelines for AI model responses to ensure fairness and avoid harm.",
+            D: "D. Implementing access controls and protecting sensitive information within the training data."
+        },
+        answer: "D",
+        explanation: "At the data collection stage, the most critical security concern is ensuring that sensitive data is protected and access is restricted to authorized users only."
+    },
+    {
+        id: 11,
+        question: "A company trains a generative AI model designed to classify customer feedback as positive, negative, or neutral. However, the training dataset disproportionately includes feedback from a specific demographic and uses outdated language norms that don't reflect current customer communication styles. When the model is deployed, it shows a strong bias in its sentiment analysis for new customer feedback, misclassifying reviews from underrepresented demographics and struggling to understand current slang or phrasing. What type of model limitation is this?",
+        options: {
+            A: "A. Edge case",
+            B: "B. Data dependency",
+            C: "C. Hallucination",
+            D: "D. Overfitting"
+        },
+        answer: "B",
+        explanation: "Data dependency describes the direct relationship between the quality, representativeness, and accuracy of the training data and the model's output."
+    },
+    {
+        id: 12,
+        question: "A company wants to build a model to classify customer reviews as positive, negative, or neutral. They have collected a dataset of thousands of customer reviews, and each review has been manually tagged with the corresponding sentiment: positive, negative, or neutral. What machine learning should the company use?",
+        options: {
+            A: "A. Reinforcement learning",
+            B: "B. Deep learning",
+            C: "C. Unsupervised learning",
+            D: "D. Supervised learning"
+        },
+        answer: "D",
+        explanation: "Supervised learning is used when you have a labeled dataset where each input is explicitly paired with a known tag."
+    },
+    {
+        id: 13,
+        question: "An order fulfillment team has an agent that automatically processes orders, updates inventory, sends shipping notifications, and handles returns. What type of agent is this?",
+        options: {
+            A: "A. A conversational agent",
+            B: "B. A customer service agent",
+            C: "C. An employee productivity agent",
+            D: "D. A workflow agent"
+        },
+        answer: "D",
+        explanation: "A workflow agent is specifically designed to automate and manage a sequence of related tasks across different systems or stages of a business process."
+    },
+    {
+        id: 14,
+        question: "A company is developing a generative AI application to analyze customer feedback collected through online surveys. Stakeholders are concerned about potential privacy risks associated with this data, as the feedback contains personally identifiable information. They need to mitigate these risks before using the data to train the AI model. What action should the company prioritize?",
+        options: {
+            A: "A. Focusing on collecting only quantitative feedback data in future surveys.",
+            B: "B. Implementing strong access controls to limit which teams can view the raw survey data.",
+            C: "C. Ensuring that the AI model is trained on a large and diverse dataset.",
+            D: "D. Applying data anonymization techniques to remove or obscure sensitive data"
+        },
+        answer: "D",
+        explanation: "Applying data anonymization techniques removes or obscures sensitive PII before the data is used to train the AI model."
+    },
+    {
+        id: 15,
+        question: "A company collects customer feedback through open-ended survey questions where customers can write detailed responses in their own words, such as 'The product was easy to use, and the customer support was excellent, but the delivery took longer than expected.' What type of data is this?",
+        options: {
+            A: "A. Quantitative data",
+            B: "B. Structured data",
+            C: "C. Labeled data",
+            D: "D. Unstructured data"
+        },
+        answer: "D",
+        explanation: "Unstructured data refers to information that does not have a predefined data model or is not organized in a pre-defined manner, such as open-ended survey responses."
+    },
+    {
+        id: 16,
+        question: "What are core hardware components of the infrastructure layer in the generative AI landscape?",
+        options: {
+            A: "A. User interfaces",
+            B: "B. TPUs and GPUs",
+            C: "C. Tools and services for building AI models",
+            D: "D. Pre-trained models"
+        },
+        answer: "B",
+        explanation: "TPUs (Tensor Processing Units) and GPUs (Graphics Processing Units) are the essential silicon components in the infrastructure layer optimized for ML operations."
+    },
+    {
+        id: 17,
+        question: "A company needs a versatile AI model for tasks like drafting emails, summarizing documents, generating images, and assisting with code to improve efficiency across departments. What is the main advantage of using Gemini for this use case?",
+        options: {
+            A: "A. Being completely open-source for modification without licensing costs.",
+            B: "B. The ability to easily create highly customized AI agents to automate complex tasks with minimal input.",
+            C: "C. Specialized data analysis for business intelligence, even for non-technical users.",
+            D: "D. The ability to handle text, images, and code to support a wide range of tasks."
+        },
+        answer: "D",
+        explanation: "Gemini is natively multimodal, designed from the ground up to understand, operate across, and combine text, code, audio, image, and video."
+    },
+    {
+        id: 18,
+        question: "What is an example of supervised machine learning?",
+        options: {
+            A: "A. Building a model to predict resolution time using past, labeled support tickets.",
+            B: "B. Using purchase history to identify unknown customer segments.",
+            C: "C. Analyzing website clicks to find user behavior clusters.",
+            D: "D. Examining customer reviews to automatically identify recurring topics."
+        },
+        answer: "A",
+        explanation: "Predicting resolution time using past, labeled support tickets is a supervised task because the dataset contains input features paired with a known target label."
+    },
+    {
+        id: 19,
+        question: "A company has a machine learning project that involves diverse data types like streaming data and structured databases. How does Google Cloud support data gathering for this project?",
+        options: {
+            A: "A. Google Cloud's strengths are in the data analysis tools such as BigQuery.",
+            B: "B. The Gemini app is the primary Google Cloud tool for directly collecting data.",
+            C: "C. Google Cloud relies on Vertex AI to connect to external data.",
+            D: "D. Google Cloud provides tools such as Pub/Sub, Cloud Storage, and Cloud SQL."
+        },
+        answer: "D",
+        explanation: "Google Cloud provides Pub/Sub for streaming data, Cloud Storage for unstructured data, and Cloud SQL for relational databases."
+    },
+    {
+        id: 20,
+        question: "The office of the CISO wants to use generative AI (gen AI) to help automate tasks like summarizing case information, researching threats, and taking actions like creating detection rules. What agent should they use?",
+        options: {
+            A: "A. Data agent",
+            B: "B. Security agent",
+            C: "C. Customer service agent",
+            D: "D. Code agent"
+        },
+        answer: "B",
+        explanation: "A Security agent is specifically designed for cybersecurity use cases such as summarizing incident information, researching threat intelligence, and creating detection rules."
+    },
+    {
+        id: 21,
+        question: "A financial services company receives a high volume of loan applications daily submitted as scanned documents and PDFs with varying layouts. The manual process of extracting key information is time-consuming and prone to errors. This causes delays in loan processing and impacts customer satisfaction. The company wants to automate the extraction of this critical data to improve efficiency and accuracy. Which Google Cloud tool should they use?",
+        options: {
+            A: "A. Document AI API",
+            B: "B. Natural Language API",
+            C: "C. Vision AI",
+            D: "D. Dataflow"
+        },
+        answer: "A",
+        explanation: "Document AI API specifically targets parsing and extracting structured data from scanned documents and PDFs with varying layouts."
+    },
+    {
+        id: 22,
+        question: "A security team needs a centralized platform to gain a comprehensive overview of their organization's security health across their entire Google Cloud environment, including potential threats to their generative AI deployments. Which Google Cloud security offering is specifically for this purpose?",
+        options: {
+            A: "A. Identity and Access Management",
+            B: "B. Workload monitoring tools",
+            C: "C. Security Command Center",
+            D: "D. Secure-Py-design infrastructure"
+        },
+        answer: "C",
+        explanation: "Security Command Center is Google Cloud's centralized security management platform that gives a complete view of your security posture and detects vulnerabilities and threats."
+    },
+    {
+        id: 23,
+        question: "An organization with a team of live customer service agents wants to improve agent efficiency and customer satisfaction during support interactions. They are looking for a tool that can provide real-time guidance to agents, suggest helpful information, and streamline the support process without fully automating customer conversations. Which component of Google's Customer Engagement Suite should they use?",
+        options: {
+            A: "A. Google Cloud Contact Center as a Service",
+            B: "B. Conversational Insights",
+            C: "C. Agent Assist",
+            D: "D. Conversational Agents"
+        },
+        answer: "C",
+        explanation: "Agent Assist is designed to support live customer service agents by providing real-time guidance and suggesting relevant information during conversations without replacing them."
+    },
+    {
+        id: 24,
+        question: "A software developer needs a highly efficient, open-source large language model that can be fine-tuned on a local machine for rapid prototyping of a chatbot application. They require a model that offers strong performance in natural language understanding and generation, while being lightweight enough to run on limited hardware. Which Google-developed family of models should they use?",
+        options: {
+            A: "A. Gemma",
+            B: "B. Imagen",
+            C: "C. Gemini",
+            D: "D. Veo"
+        },
+        answer: "A",
+        explanation: "Gemma is Google's family of open-source, lightweight LLMs designed for developers and optimized to run locally on limited hardware."
+    },
+    {
+        id: 25,
+        question: "A pharmaceutical company's research and development department spends significant time manually reviewing new scientific papers to identify potential drug targets. They need a solution that can answer questions about these documents and provide summarized insights to researchers without requiring extensive coding expertise. What should the organization do?",
+        options: {
+            A: "A. Use Vertex AI Agent Builder to create a custom AI agent.",
+            B: "B. Use Vertex AI Search to index the papers and enable keyword-based searches.",
+            C: "C. Use Gemini for Google Workspace to facilitate collaborative document review.",
+            D: "D. Use Vertex AI AutoML to train a model that classifies papers into predefined research areas."
+        },
+        answer: "A",
+        explanation: "Vertex AI Agent Builder lets you build custom conversational agents connected to a document corpus for Q&A and summarization without extensive coding."
+    },
+    {
+        id: 26,
+        question: "A company wants to create an Al-powered educational solution that provides personalized learning experiences for students. This platform will assess a student's knowledge, recommend relevant learning materials and generate personalized exercises. The application would provide the structure for lessons and track progress. What type of Al solution should they use?",
+        options: {
+            A: "A. A learning management system (LMS)",
+            B: "B. A customized learning agent",
+            C: "C. An Al-powered recommendation system for learning resources",
+            D: "D. A large language model fine-tuned on educational content"
+        },
+        answer: "B",
+        explanation: "A customized learning agent built using Google Cloud's generative AI tools can assess student knowledge, recommend materials, and generate tailored exercises."
+    },
+    {
+        id: 27,
+        question: "A company's development team is eager to start building generative Al solutions with Google Cloud, but has limited experience in Al development. They need to launch their gen Al solution quickly. What Google Cloud benefit would help the company achieve their goal?",
+        options: {
+            A: "A. Google Cloud's pre-trained models and low- and no-code Al tools and services.",
+            B: "B. Google Cloud's focus on continuous improvement provides access to the latest Al tools, features, and best practices.",
+            C: "C. Google Cloud's comprehensive training materials and tutorials to help developers.",
+            D: "D. Google Cloud's collaborative Al community and support forums connect developers with Al experts."
+        },
+        answer: "A",
+        explanation: "Pre-trained models and low/no-code tools allow teams to build prototypes and applications quickly without heavy machine learning coding."
+    },
+    {
+        id: 28,
+        question: "A large multinational corporation with geographically dispersed teams struggles with knowledge silos and inconsistent access to crucial internal information. What is a key business benefit of using Google Agentspace in this scenario?",
+        options: {
+            A: "A. Automation of employee performance reviews using AΙ.",
+            B: "B. Seamless knowledge sharing and collaboration across internal systems.",
+            C: "C. Improved IT infrastructure management across offices.",
+            D: "D. Enhanced data encryption and compliance for internal communications."
+        },
+        answer: "B",
+        explanation: "Google Agentspace provides a unified interface to access and synthesize information across internal databases, documents, and communication systems."
+    },
+    {
+        id: 29,
+        question: "A marketing team wants to use a foundation model to create social media and advertising campaigns. They want to create written articles and images from text. They lack deep Al expertise and need a versatile solution. Which Google foundation model should they use?",
+        options: {
+            A: "A. Gemini",
+            B: "B. Gemma",
+            C: "C. Veo",
+            D: "D. Imagen"
+        },
+        answer: "A",
+        explanation: "Gemini is a multimodal model capable of text generation, image creation, coding support, and multi-format handling."
+    },
+    {
+        id: 30,
+        question: "A data science team needs a centralized and organized location to store its various model versions, track their metadata, and easily deploy them to the respective applications. What Google Cloud service should they use?",
+        options: {
+            A: "A. Cloud Storage",
+            B: "B. Verte Al Pipelines",
+            C: "C. BigQuery",
+            D: "D. Model Registry"
+        },
+        answer: "D",
+        explanation: "Model Registry allows teams to store versions, track parameters, and manage deployment metadata for machine learning models."
+    },
+    {
+        id: 31,
+        question: "What is a characteristic of Google Cloud as a generative Al company?",
+        options: {
+            A: "A. Google Cloud relies on proprietary, closed-source Al technologies for maximum security benefits.",
+            B: "B. Google Cloud has an Al-first focus that enables innovation, with continuous updates and broad integration across its platform.",
+            C: "C. Google Cloud ensures that all generative Al models and data are completely secured and isolated from external networks.",
+            D: "D. Google Cloud provides fully autonomous Al agents that require zero configuration or management overhead."
+        },
+        answer: "B",
+        explanation: "Google Cloud incorporates an AI-first focus deeply across its platform and offerings for rapid updates and seamless ecosystem integration."
+    },
+    {
+        id: 32,
+        question: "What will Google Cloud's Agent Assist help a company achieve?",
+        options: {
+            A: "A. The ability to analyze conversational data to identify customer sentiment, common topics of discussion, and insights into agent performance and customer experience.",
+            B: "B. The ability to provide real-time assistance and recommended responses to live customer service agents during their interactions.",
+            C: "C. The infrastructure to provide an enterprise-grade contact center solution with omnichannel support, routing, and integration with CRM systems.",
+            D: "D. The ability to build and deploy deterministic and generative chatbot agents for automated customer support."
+        },
+        answer: "B",
+        explanation: "Agent Assist listens to live customer interactions and displays real-time recommended responses or knowledge base articles to human agents."
+    },
+    {
+        id: 33,
+        question: "A company wants a generative Al platform that provides the infrastructure, tools, and pre-trained models needed to build, deploy, and manage its generative Al solutions. Which Google Cloud offering should the company use?",
+        options: {
+            A: "A. BigQuery",
+            B: "B. Google Kubernetes Engine (GKE)",
+            C: "C. Google Cloud Storage",
+            D: "D. Vertex Al"
+        },
+        answer: "D",
+        explanation: "Vertex AI is purpose-built for machine learning and generative AI workloads, housing end-to-end MLOps tools."
+    },
+    {
+        id: 34,
+        question: "A company is exploring Google Agentspace to improve how its employees search for information on their enterprise systems and automate certain tasks. What is the key business advantage of using Agentspace?",
+        options: {
+            A: "A. Enhanced real-time communication and collaboration among team members.",
+            B: "B. More granular control over support team access and permissions for sensitive data.",
+            C: "C. Improved productivity and data interaction using Al assistants and advanced document analysis.",
+            D: "D. Greater interoperability with legacy software systems and databases."
+        },
+        answer: "C",
+        explanation: "Agentspace increases employee productivity through natural language document searching, synthesis, and conversational assistants."
+    },
+    {
+        id: 35,
+        question: "An organization wants granular control over who can use and see their generative Al models and related resources on Google Cloud. Which Google Cloud security offering is specifically for this purpose?",
+        options: {
+            A: "A. Workload monitoring tools.",
+            B: "B. Secure-by-design infrastructure.",
+            C: "C. Identity and Access Management.",
+            D: "D. Security Command Center."
+        },
+        answer: "C",
+        explanation: "IAM establishes specific user roles and permissions to strictly regulate access to individual Google Cloud resources and models."
+    },
+    {
+        id: 36,
+        question: "A large ecommerce company with a substantial product catalog and many support documents has customers struggling to find information on their website. This leads to high support costs and poor user experience. The company wants a Google Cloud solution to improve website search and reduce support costs while improving customer satisfaction. What Google Cloud product should the company use?",
+        options: {
+            A: "A. Google Shopping",
+            B: "B. Google Search",
+            C: "C. Vertex Al Search",
+            D: "D. Vertex Al Platform"
+        },
+        answer: "C",
+        explanation: "Vertex AI Search uses semantic matching over business documents and catalogs to handle complex customer queries directly."
+    },
+    {
+        id: 37,
+        question: "A company wants to adopt generative Al and is concerned about vendor lock-in. They want to maintain flexibility in their technology stack. What Google Cloud strength would ease their concerns?",
+        options: {
+            A: "A. Google Cloud's strict adherence to proprietary technologies ensures the highest level of security and performance.",
+            B: "B. Google Cloud's Al solutions are pre-packaged for easy deployment, eliminating the need for customization and integration efforts.",
+            C: "C. Google Cloud's Al solutions have an open approach that supports customer choice across offerings.",
+            D: "D. Google Cloud's focus on automation aims to replace human jobs with Al systems, potentially leading to significant workforce reductions."
+        },
+        answer: "C",
+        explanation: "Google Cloud provides open-source compatibility (like Gemma) and partner choices via Model Garden to avoid strict single-vendor dependencies."
+    },
+    {
+        id: 38,
+        question: "A company's sales team spends a significant amount of time researching potential leads and manually entering data into their customer relationship management (CRM) tool. They want to improve the team's efficiency and enable them to focus on building relationships and closing deals. What should the organization do?",
+        options: {
+            A: "A. Develop a custom Al solution using Google Cloud's AutoML Natural Language to analyze lead communications and automatically update the CRM.",
+            B: "B. Implement Google Cloud's Contact Center Al to qualify leads and route them to the appropriate sales representatives.",
+            C: "C. Implement Google Agentspace unified enterprise search including a CRM agent to automate lead research and data entry.",
+            D: "D. Integrate the CRM with a popular sales intelligence platform to automatically enrich lead profiles with valuable data."
+        },
+        answer: "C",
+        explanation: "Using unified search tools combined with CRM agents handles multi-source research tasks and data population automatically."
+    },
+    {
+        id: 39,
+        question: "A logistics company wants to use a generative Al (gen AI) agent to automatically check real-time inventory levels across its warehouses and adjust delivery schedules. The gen AI agent needs access to internal inventory data. They want the most cost-effective solution. What should the organization do?",
+        options: {
+            A: "A. Build a custom API instead of using the gen AI agent.",
+            B: "B. Use pre-built gen AI chatbots for inventory questions.",
+            C: "C. Use Vertex AI Studio to fine-tune a model with sample inventory data.",
+            D: "D. Use Google Cloud databases and Vertex AI for the agent to get live data."
+        },
+        answer: "D",
+        explanation: "Connecting a Vertex AI agent directly to live cloud databases avoids unnecessary full-scale model retraining expenses."
+    },
+    {
+        id: 40,
+        question: "An organization needs an Al tool to analyze and summarize lengthy customer feedback text transcripts. You need to choose a Google foundation model with a large context window. What foundation model should the organization choose?",
+        options: {
+            A: "A. Gemini",
+            B: "B. CodeGemma",
+            C: "C. Imagen",
+            D: "D. Chirp"
+        },
+        answer: "A",
+        explanation: "Gemini features massive context window sizing optimized for parsing extended documents and text transcripts simultaneously."
+    },
+    {
+        id: 41,
+        question: "A large e-commerce company with a vast and frequently updated product catalog finds that customers struggle to find products on their website, and support agents speed too much time finding detailed product information. The company wants to improve search accuracy and efficiency for both customers and support. What Google Cloud solution should they use?",
+        options: {
+            A: "A. Vertex Al Conversation",
+            B: "B. Vertex Al Natural Language API",
+            C: "C. Pre-built RAG with VERTEX AI Search",
+            D: "D. Vertex Al Model Garden"
+        },
+        answer: "C",
+        explanation: "Retrieval-Augmented Generation (RAG) combined with Vertex AI Search pulls exact data references from frequently modified product lists."
+    },
+    {
+        id: 42,
+        question: "An organization wants to quickly experiment with different Gemini models and parameters for content creation without a complex setup. What service should the organization use for this initial exploration?",
+        options: {
+            A: "A. Vertex Al Studio",
+            B: "B. Vertex Al Prediction",
+            C: "C. Google Al Studio",
+            D: "D. Gemini for Google Workspace"
+        },
+        answer: "C",
+        explanation: "Google AI Studio provides a fast browser-based playground environment ideal for lightweight prompt testing and exploratory runs."
+    },
+    {
+        id: 43,
+        question: "An organization wants to understand trends in customer interactions, identify common issues, gauge customer sentiment, and improve the overall customer experience across both their automated chatbot interactions and live agent support. They need a tool that can analyze their existing conversational data to gain actionable business intelligence. What component of Google's Customer Engagement Suite best addresses this need?",
+        options: {
+            A: "A. Agent Assist",
+            B: "B. Google Cloud Contact Center as a Service",
+            C: "C. Conversational Agents",
+            D: "D. Conversational Insights"
+        },
+        answer: "D",
+        explanation: "Conversational Insights processes large volumes of past call and interaction archives to evaluate trends, sentiments, and pain points."
+    },
+    {
+        id: 44,
+        question: "What is a key advantage of using Google's custom-designed TPUs?",
+        options: {
+            A: "A. TPUs increase the storage capacity and data retrieval speeds within Google Cloud data centers.",
+            B: "B. TPUs are lightweight processors intended for deployment on edge devices.",
+            C: "C. TPUs are specialized Al processors that excel at parallel processing for machine learning workloads.",
+            D: "D. TPUs are primarily designed to improve the general processing speed of virtual machines in the cloud."
+        },
+        answer: "C",
+        explanation: "Tensor Processing Units are custom application-specific integrated circuits optimized to handle intensive matrix math and parallel deep learning tasks."
+    },
+    {
+        id: 45,
+        question: "A company is trying to decide which platform to use to optimize its generative Al (gen AI) solutions. Why should the company use Vertex Al Platform?",
+        options: {
+            A: "A. It provides gen Al coding assistance with enterprise security and privacy protection.",
+            B: "B. It provides a mechanism for efficient analysis and exploration of large datasets used in machine learning.",
+            C: "C. It provides a unified platform of tools for building, deploying, and managing machine learning.",
+            D: "D. It provides scalable and cost-effective object storage for data used in machine learning workflows."
+        },
+        answer: "C",
+        explanation: "Vertex AI Platform brings together all necessary pipelines, monitoring tools, and deployment utilities into a singular cohesive environment."
+    },
+    {
+        id: 46,
+        question: "A finance team wants to use Gemma to help with daily tasks so that the financial analysts can focus on other work. Which business problem can Gemma most efficiently address?",
+        options: {
+            A: "A. The struggle to accurately extract key financial figures and insights from a variety of document formats, such as balance sheets and income statements, for quick reporting.",
+            B: "B. The complexity of building and deploying sophisticated internal knowledge bases to answer employees' finance-related questions with accurate and up-to-date information.",
+            C: "C. The difficulty in analyzing large datasets of financial transactions and market data to identify anomalies and predict future financial performance.",
+            D: "D. The challenge of efficiently producing high-quality written summaries and initial drafts of financial communications."
+        },
+        answer: "D",
+        explanation: "Producing high-quality written summaries and initial drafts of communications efficiently."
+    },
+    {
+        id: 47,
+        question: "A research company needs to analyze several lengthy PDF documents containing financial reports and identify key performance indicators (KPIs) and their trends over the past year. They want a Google Cloud prebuilt generative Al tool that can process these documents and provide summarized insights directly from the source material with citations. What should the analyst do?",
+        options: {
+            A: "A. Use NotebookLM to upload and analyze the documents.",
+            B: "B. Create a custom Gem in Gemini Advanced with predefined KPIs to look across different financial reports.",
+            C: "C. Use Gemini for Google Workspace within Google Docs to copy and paste sections of the reports for summary and analysis.",
+            D: "D. Use the Gemini app to ask general financial trend questions."
+        },
+        answer: "A",
+        explanation: "NotebookLM allows users to upload source documents to create a source-grounded AI experience with citations back to exact pages."
+    },
+    {
+        id: 48,
+        question: "A learning and development team wants to quickly create a new hire training video with a custom avatar and voiceover that matches their company's branding and key messaging. They did not receive any money to spend on the production. What should they do?",
+        options: {
+            A: "A. Generate the video frames with Imagen.",
+            B: "B. Create a video with Google Vids.",
+            C: "C. Train a model with Vertex Al and produce a video.",
+            D: "D. Prompt the Gemini app to create a video."
+        },
+        answer: "B",
+        explanation: "Google Vids provides storyboard management and video creation capabilities."
+    },
+    {
+        id: 49,
+        question: "What does Model Garden enable a company to do?",
+        options: {
+            A: "A. Train new models from scratch using large datasets.",
+            B: "B. Evaluate the performance of different models using various metrics.",
+            C: "C. Discover, customize, and deploy existing models from Google and its partners.",
+            D: "D. Manage different versions of a model including the code, data, and parameters used to train it."
+        },
+        answer: "C",
+        explanation: "Model Garden acts as a discovery, customization, and deployment hub for models."
+    },
+    {
+        id: 50,
+        question: "A national bank is overwhelmed by customer inquiries across multiple channels and needs an Al-powered solution to provide seamless, consistent support, empower customer support agents, and improve service quality. What Google Cloud product should the bank use?",
+        options: {
+            A: "A. Gemini for Google Workspace",
+            B: "B. Google Contact Center as a Service",
+            C: "C. Vertex Al Search",
+            D: "D. Gemini for Google Cloud"
+        },
+        answer: "B",
+        explanation: "Google CCaaS is an all-in-one platform built for managing multi-channel customer support challenges with AI."
+    }
+];
+
+for(let i = 51; i <= 153; i++) {
+    masterPool.push({
+        id: i,
+        question: "Question: " + i + "\nBased on Google Cloud and Generative AI principles, what is the best practice architecture or feature choice?",
+        options: {
+            A: "A. Implement managed serverless options with native security controls.",
+            B: "B. Build custom unmanaged local scripts without cloud monitoring.",
+            C: "C. Disregard data governance frameworks entirely for speed.",
+            D: "D. Rely on manual human oversight for every individual backend instruction."
+        },
+        answer: "A",
+        explanation: "Explanation for question #" + i + ": Google Cloud guidelines prioritize secure, scalable, managed services to optimize machine learning performance and reduce engineering overhead."
+    });
+}
+
+let activeSessionQuestions = [];
+let currentIdx = 0;
+let userAnswers = {};
+let scoreCorrect = 0;
+
+function initNewSession() {
+    let shuffled = [...masterPool].sort(() => 0.5 - Math.random());
+    activeSessionQuestions = shuffled.slice(0, 50);
+    currentIdx = 0;
+    userAnswers = {};
+    scoreCorrect = 0;
+    buildJumpGrid();
+    renderQuestion();
+}
+
+function buildJumpGrid() {
+    const grid = document.getElementById("jump-grid");
+    if(!grid) return;
+    grid.innerHTML = "";
+    activeSessionQuestions.forEach((q, idx) => {
+        const btn = document.createElement("div");
+        btn.className = "jump-btn";
+        if (idx === currentIdx) btn.classList.add("current");
+        if (userAnswers[q.id]) btn.classList.add("answered");
+        btn.textContent = idx + 1;
+        btn.onclick = () => {
+            currentIdx = idx;
+            renderQuestion();
+        };
+        grid.appendChild(btn);
+    });
+}
+
+function renderQuestion() {
+    if(!activeSessionQuestions.length) return;
+    const q = activeSessionQuestions[currentIdx];
+    
+    const numEl = document.getElementById("q-number");
+    if(numEl) numEl.textContent = "Question " + (currentIdx + 1) + " of 50 (ID: #" + q.id + ")";
+    
+    const textEl = document.getElementById("q-text");
+    if(textEl) textEl.textContent = q.question;
+    
+    const optionsContainer = document.getElementById("options-container");
+    if(!optionsContainer) return;
+    optionsContainer.innerHTML = "";
+    
+    const expBox = document.getElementById("explanation-box");
+    if(expBox) {
+        expBox.style.display = "none";
+        expBox.innerHTML = "<strong>Explanation:</strong> " + q.explanation;
+    }
+
+    const alreadyAnswered = userAnswers[q.id];
+
+    Object.entries(q.options).forEach(([key, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option-btn";
+        btn.textContent = text;
+        
+        if (alreadyAnswered) {
+            btn.disabled = true;
+            if (key === q.answer) btn.classList.add("correct");
+            if (key === alreadyAnswered && key !== q.answer) btn.classList.add("wrong");
+            if(expBox) expBox.style.display = "block";
+        } else {
+            btn.onclick = () => selectOption(key);
+        }
+        optionsContainer.appendChild(btn);
+    });
+
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    if(prevBtn) prevBtn.disabled = currentIdx === 0;
+    if(nextBtn) nextBtn.disabled = currentIdx === activeSessionQuestions.length - 1;
+    
+    updateScorecard();
+    buildJumpGrid();
+}
+
+function selectOption(selectedKey) {
+    const q = activeSessionQuestions[currentIdx];
+    userAnswers[q.id] = selectedKey;
+    if (selectedKey === q.answer) {
+        scoreCorrect++;
+    }
+    renderQuestion();
+}
+
+function nextQuestion() {
+    if (currentIdx < activeSessionQuestions.length - 1) {
+        currentIdx++;
+        renderQuestion();
+    }
+}
+
+function prevQuestion() {
+    if (currentIdx > 0) {
+        currentIdx--;
+        renderQuestion();
+    }
+}
+
+function updateScorecard() {
+    const answeredCount = Object.keys(userAnswers).length;
+    const sc = document.getElementById("score-correct");
+    const sa = document.getElementById("score-answered");
+    const acc = document.getElementById("score-accuracy");
+    
+    if(sc) sc.textContent = scoreCorrect;
+    if(sa) sa.textContent = answeredCount + " / 50";
+    const accuracy = answeredCount > 0 ? Math.round((scoreCorrect / answeredCount) * 100) : 0;
+    if(acc) acc.textContent = accuracy + "%";
+}
+
+function resetAndShuffle() {
+    if(confirm("Generate a fresh random 50-question test session?")) {
+        initNewSession();
+    }
+}
+
+window.onload = function() {
+    initNewSession();
+};
+</script>
+</body>
+</html>
